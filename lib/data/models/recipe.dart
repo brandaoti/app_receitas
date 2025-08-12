@@ -1,5 +1,5 @@
 class Recipe {
-  final int id;
+  final String id;
   final String name;
   final List<String> ingredients;
   final List<String> instructions;
@@ -10,7 +10,7 @@ class Recipe {
   final String? cuisine;
   final int? caloriesPerServing;
   final List<String>? tags;
-  final int userId;
+  final String userId;
   final String? image;
   final double? rating;
   final int? reviewCount;
@@ -37,12 +37,9 @@ class Recipe {
     this.mealType,
   });
 
-  // Construtor factory para criar Recipe a partir de JSON
-  // Utiliza o método _parseJsonList para garantir que os campos
-  // de lista sejam tratados corretamente.
-  factory Recipe.fromJson(Map<String, dynamic> json) {
+  factory Recipe.fromMap(Map<String, dynamic> json) {
     return Recipe(
-      id: json['id'] as int,
+      id: json['id'],
       name: json['name'] as String,
       ingredients: _parseJsonList(json['ingredients']),
       instructions: _parseJsonList(json['instructions']),
@@ -53,7 +50,7 @@ class Recipe {
       cuisine: json['cuisine'] as String?,
       caloriesPerServing: json['calories_per_serving'] as int?,
       tags: _parseJsonListOptional(json['tags']),
-      userId: json['user_id'] as int,
+      userId: json['user_id'],
       image: json['image'] as String?,
       rating: json['rating'] != null
           ? (json['rating'] as num).toDouble()
@@ -63,8 +60,7 @@ class Recipe {
     );
   }
 
-  // Recipe -> JSON
-  Map<String, dynamic> toJson() {
+  Map<String, dynamic> toMap() {
     return {
       'id': id,
       'name': name,
@@ -89,8 +85,6 @@ class Recipe {
     if (json is List) {
       return json.map((e) => e.toString()).toList();
     } else if (json is String) {
-      // Quando for uma string, tenta dividir por vírgulas
-      // e tratar como uma lista de strings
       try {
         final List<dynamic> parsed = json
             .split(',')
