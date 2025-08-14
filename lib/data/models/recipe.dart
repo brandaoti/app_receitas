@@ -37,6 +37,8 @@ class Recipe {
     this.mealType,
   });
 
+  get value => null;
+
   factory Recipe.fromMap(Map<String, dynamic> json) {
     return Recipe(
       id: json['id'],
