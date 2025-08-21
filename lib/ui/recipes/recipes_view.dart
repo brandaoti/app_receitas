@@ -13,20 +13,23 @@ class RecipesView extends StatefulWidget {
 }
 
 class _RecipesViewState extends State<RecipesView> {
-  final viewModel = getIt<RecipeViewModel>();
+  late final IRecipeViewModel _viewModel;
 
   @override
   void initState() {
     super.initState();
+
+    _viewModel = getIt<IRecipeViewModel>();
+
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      viewModel.onInit();
+      _viewModel.onInit();
     });
   }
 
   @override
   Widget build(BuildContext context) {
     return Obx(() {
-      if (viewModel.isLoading) {
+      if (_viewModel.isLoading) {
         return Center(
           child: SizedBox(
             height: 96,
@@ -36,7 +39,7 @@ class _RecipesViewState extends State<RecipesView> {
         );
       }
 
-      if (viewModel.errorMessage != '') {
+      if (_viewModel.errorMessage != '') {
         return Center(
           child: Container(
             padding: EdgeInsets.all(32),
@@ -44,12 +47,12 @@ class _RecipesViewState extends State<RecipesView> {
               spacing: 32,
               children: [
                 Text(
-                  'Erro: ${viewModel.errorMessage}',
+                  'Erro: ${_viewModel.errorMessage}',
                   style: TextStyle(fontSize: 24),
                 ),
                 ElevatedButton(
                   onPressed: () {
-                    viewModel.getRecipes();
+                    _viewModel.getRecipes();
                   },
                   child: Text('TENTAR NOVAMENTE'),
                 ),
@@ -64,12 +67,12 @@ class _RecipesViewState extends State<RecipesView> {
         child: Column(
           children: [
             Expanded(
-              child: viewModel.recipes.isNotEmpty
+              child: _viewModel.recipes.isNotEmpty
                   ? Center(
                       child: Column(
                         children: [
                           Text(
-                            '${viewModel.recipes.length} receitas(s)',
+                            '${_viewModel.recipes.length} receitas(s)',
                             style: TextStyle(
                               fontWeight: FontWeight.bold,
                               fontSize: 16,
@@ -79,9 +82,9 @@ class _RecipesViewState extends State<RecipesView> {
                           Expanded(
                             child: ListView.builder(
                               shrinkWrap: true,
-                              itemCount: viewModel.recipes.length,
+                              itemCount: _viewModel.recipes.length,
                               itemBuilder: (context, index) {
-                                final recipe = viewModel.recipes[index];
+                                final recipe = _viewModel.recipes[index];
                                 return Stack(
                                   children: [RecipeCard(recipe: recipe)],
                                 );

@@ -14,8 +14,12 @@ class ServiceLocator {
     getIt.registerSingleton<SupabaseClient>(Supabase.instance.client);
 
     getIt.registerLazySingleton<RecipeService>(() => RecipeService());
-    getIt.registerLazySingleton<RecipeRepository>(() => RecipeRepository());
-    getIt.registerLazySingleton<RecipeViewModel>(() => RecipeViewModel());
+    getIt.registerLazySingleton<IRecipeRepository>(
+      () => RecipeRepositoryImpl(getIt<RecipeService>()),
+    );
+    getIt.registerLazySingleton<IRecipeViewModel>(
+      () => RecipeViewModelImpl(getIt<IRecipeRepository>()),
+    );
     getIt.registerLazySingleton<AuthViewModel>(() => AuthViewModel());
     getIt.registerLazySingleton<FavRecipesViewModel>(
       () => FavRecipesViewModel(),
