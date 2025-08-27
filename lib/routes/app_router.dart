@@ -11,13 +11,13 @@ class AppRouter {
 
   AppRouter() {
     router = GoRouter(
-      initialLocation: '/',
+      initialLocation: '/home',
       routes: [
         GoRoute(path: '/login', builder: (context, state) => const AuthView()),
         ShellRoute(
           builder: (context, state, child) => BaseScreen(child: child),
           routes: [
-            GoRoute(path: '/', builder: (context, state) => RecipesView()),
+            GoRoute(path: '/home', builder: (context, state) => RecipesView()),
             GoRoute(
               path: '/recipe/:id',
               builder: (context, state) =>

@@ -1,6 +1,7 @@
 import 'package:app_receitas/data/di/service_locator.dart';
 import 'package:flutter/material.dart';
 import 'package:get/state_manager.dart';
+import 'package:go_router/go_router.dart';
 
 import '../widgets/recipe_card.dart';
 import 'recipe_view_model.dart';
@@ -86,7 +87,13 @@ class _RecipesViewState extends State<RecipesView> {
                               itemBuilder: (context, index) {
                                 final recipe = _viewModel.recipes[index];
                                 return Stack(
-                                  children: [RecipeCard(recipe: recipe)],
+                                  children: [
+                                    GestureDetector(
+                                      child: RecipeCard(recipe: recipe),
+                                      onTap: () =>
+                                          context.go('/recipe/${recipe.id}'),
+                                    ),
+                                  ],
                                 );
                               },
                             ),
