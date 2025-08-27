@@ -7,15 +7,15 @@ import '../services/recipe_service.dart';
 abstract class IRecipeRepository {
   Future<Output<List<Recipe>>> getRecipes();
   Future<Recipe?> getRecipeById(String id);
-  Future<List<Recipe>> getFavRecipes(String userId);
-  Future<void> insertFavRecipe(String recipeId, String userId);
-  Future<void> deleteFavRecipe(String recipeId, String userId);
+  Future<Output<List<Recipe>>> getFavRecipes(String userId);
+  Future<Output<Unit>> insertFavRecipe(String recipeId, String userId);
+  Future<Output<Unit>> deleteFavRecipe(String recipeId, String userId);
 }
 
 class RecipeRepositoryImpl implements IRecipeRepository {
   final RecipeService _recipeService;
 
-  RecipeRepositoryImpl(RecipeService recipeService)
+  const RecipeRepositoryImpl(RecipeService recipeService)
     : _recipeService = recipeService;
 
   @override
@@ -35,21 +35,44 @@ class RecipeRepositoryImpl implements IRecipeRepository {
   }
 
   @override
-  Future<List<Recipe>> getFavRecipes(String userId) async {
+  Future<Output<List<Recipe>>> getFavRecipes(String userId) async {
     final rawData = await _recipeService.fetchFavRecipes(userId);
-    return rawData
-        .where((data) => data['recipes'] != null)
-        .map((data) => Recipe.fromMap(data['recipes'] as Map<String, dynamic>))
-        .toList();
+    try {
+      final recipes = rawData
+          .where((data) => data['recipes'] != null)
+          .map(
+            (data) => Recipe.fromMap(data['recipes'] as Map<String, dynamic>),
+          )
+          .toList();
+      return Right(recipes);
+    } catch (e) {
+      return Left(
+        DefaultException(message: 'Failed to load favorite recipes: $e'),
+      );
+    }
   }
 
   @override
-  Future<void> insertFavRecipe(String recipeId, String userId) async {
-    await _recipeService.insertFavRecipe(recipeId, userId);
+  Future<Output<Unit>> insertFavRecipe(String recipeId, String userId) async {
+    try {
+      await _recipeService.insertFavRecipe(recipeId, userId);
+      return Right(unit);
+    } catch (e) {
+      return Left(
+        DefaultException(message: 'Failed to insert favorite recipe: $e'),
+      );
+    }
   }
 
   @override
-  Future<void> deleteFavRecipe(String recipeId, String userId) async {
-    await _recipeService.deleteFavRecipe(recipeId, userId);
+  Future<Output<Unit>> deleteFavRecipe(String recipeId, String userId) async {
+    try {
+      await _recipeService.deleteFavRecipe(recipeId, userId);
+      return Right(unit);
+    } catch (e) {
+      return Left(
+        DefaultException(message: 'Failed to delete favorite recipe: $e'),
+      );
+    }
   }
 }
