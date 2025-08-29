@@ -1,3 +1,4 @@
+import 'package:app_receitas/data/repositories/auth_repository.dart';
 import 'package:get/get.dart';
 
 import '../../data/models/recipe.dart';
@@ -14,9 +15,13 @@ abstract class IFavRecipesViewModel {
 class FavRecipesViewModelImpl extends GetxController
     implements IFavRecipesViewModel {
   final IRecipeRepository _recipeRepository;
+  final IAuthRepository _authRepository;
 
-  FavRecipesViewModelImpl(IRecipeRepository recipeRepository)
-    : _recipeRepository = recipeRepository;
+  FavRecipesViewModelImpl({
+    required IRecipeRepository recipeRepository,
+    required IAuthRepository authRepository,
+  }) : _recipeRepository = recipeRepository,
+       _authRepository = authRepository;
 
   final _favRecipes = <Recipe>[].obs;
   final _isLoading = false.obs;
@@ -33,12 +38,21 @@ class FavRecipesViewModelImpl extends GetxController
 
   @override
   Future<void> getFavRecipes() async {
-    if (favRecipes.isNotEmpty) return;
-
     _isLoading.value = true;
     _errorMessage.value = '';
 
-    final userId = '18e2ed83-1e9c-4537-a839-953d56552e1e';
+    late final String userId;
+
+    final currentUser = await _authRepository.currentUser;
+
+    currentUser.fold(
+      ifLeft: (error) {
+        _errorMessage.value = error.message;
+        _isLoading.value = false;
+        return;
+      },
+      ifRight: (user) => userId = user.id,
+    );
 
     final result = await _recipeRepository.getFavRecipes(userId);
 

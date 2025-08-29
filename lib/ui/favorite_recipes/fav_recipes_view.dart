@@ -14,20 +14,21 @@ class FavRecipesView extends StatefulWidget {
 }
 
 class _FavRecipesViewState extends State<FavRecipesView> {
-  final viewModel = getIt<FavRecipesViewModel>();
+  late final IFavRecipesViewModel _viewModel;
 
   @override
   void initState() {
     super.initState();
+    _viewModel = getIt<IFavRecipesViewModel>();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      viewModel.getFavRecipes();
+      _viewModel.getFavRecipes();
     });
   }
 
   @override
   Widget build(BuildContext context) {
     return Obx(() {
-      if (viewModel.isLoading) {
+      if (_viewModel.isLoading) {
         return Center(
           child: SizedBox(
             height: 96,
@@ -37,7 +38,7 @@ class _FavRecipesViewState extends State<FavRecipesView> {
         );
       }
 
-      if (viewModel.errorMessage != '') {
+      if (_viewModel.errorMessage != '') {
         return Center(
           child: Container(
             padding: EdgeInsets.all(32),
@@ -45,12 +46,12 @@ class _FavRecipesViewState extends State<FavRecipesView> {
               spacing: 32,
               children: [
                 Text(
-                  'Erro: ${viewModel.errorMessage}',
+                  'Erro: ${_viewModel.errorMessage}',
                   style: TextStyle(fontSize: 24),
                 ),
                 ElevatedButton(
                   onPressed: () {
-                    viewModel.getFavRecipes();
+                    _viewModel.getFavRecipes();
                   },
                   child: Text('TENTAR NOVAMENTE'),
                 ),
@@ -65,12 +66,12 @@ class _FavRecipesViewState extends State<FavRecipesView> {
         child: Column(
           children: [
             Expanded(
-              child: viewModel.favRecipes.isNotEmpty
+              child: _viewModel.favRecipes.isNotEmpty
                   ? Center(
                       child: Column(
                         children: [
                           Text(
-                            '${viewModel.favRecipes.length} favorita(s)',
+                            '${_viewModel.favRecipes.length} favorita(s)',
                             style: TextStyle(
                               fontWeight: FontWeight.bold,
                               fontSize: 16,
@@ -79,9 +80,9 @@ class _FavRecipesViewState extends State<FavRecipesView> {
                           const SizedBox(height: 16),
                           Expanded(
                             child: ListView.builder(
-                              itemCount: viewModel.favRecipes.length,
+                              itemCount: _viewModel.favRecipes.length,
                               itemBuilder: (context, index) {
-                                final recipe = viewModel.favRecipes[index];
+                                final recipe = _viewModel.favRecipes[index];
                                 return Stack(
                                   children: [
                                     GestureDetector(
