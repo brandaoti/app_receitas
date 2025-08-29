@@ -1,24 +1,35 @@
 import 'package:supabase_flutter/supabase_flutter.dart';
 
-import '../di/service_locator.dart';
+abstract class IRecipeService {
+  Future<List<PostgrestMap>> fetchRecipes();
+  Future<Map<String, dynamic>?> fetchRecipeById(String id);
+  Future<List<PostgrestMap>> fetchFavRecipes(String userId);
+  Future<void> insertFavRecipe(String recipeId, String userId);
+  Future<void> deleteFavRecipe(String recipeId, String userId);
+}
 
-class RecipeService {
-  final _supabaseClient = getIt.get<SupabaseClient>();
+class RecipeServiceImpl implements IRecipeService {
+  final SupabaseClient _client;
 
-  Future<List<Map<String, dynamic>>> fetchRecipes() async {
-    final response = await _supabaseClient
+  const RecipeServiceImpl(SupabaseClient client) : _client = client;
+
+  @override
+  Future<List<PostgrestMap>> fetchRecipes() async {
+    final response = await _client
         .from('recipes')
         .select()
         .order('id', ascending: true);
     return response;
   }
 
+  @override
   Future<Map<String, dynamic>?> fetchRecipeById(String id) async {
-    return await _supabaseClient.from('recipes').select().eq('id', id).single();
+    return await _client.from('recipes').select().eq('id', id).single();
   }
 
-  Future<List<Map<String, dynamic>>> fetchFavRecipes(String userId) async {
-    return await _supabaseClient
+  @override
+  Future<List<PostgrestMap>> fetchFavRecipes(String userId) async {
+    return await _client
         .from('favorites')
         .select('''
         recipes(
@@ -43,15 +54,17 @@ class RecipeService {
         .eq('user_id', userId);
   }
 
+  @override
   Future<void> insertFavRecipe(String recipeId, String userId) async {
-    await _supabaseClient.from('favorites').insert({
+    await _client.from('favorites').insert({
       'recipe_id': recipeId,
       'user_id': userId,
     });
   }
 
+  @override
   Future<void> deleteFavRecipe(String recipeId, String userId) async {
-    await _supabaseClient
+    await _client
         .from('favorites')
         .delete()
         .eq('recipe_id', recipeId)

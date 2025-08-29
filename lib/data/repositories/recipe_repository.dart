@@ -13,9 +13,9 @@ abstract class IRecipeRepository {
 }
 
 class RecipeRepositoryImpl implements IRecipeRepository {
-  final RecipeService _recipeService;
+  final IRecipeService _recipeService;
 
-  const RecipeRepositoryImpl(RecipeService recipeService)
+  const RecipeRepositoryImpl(IRecipeService recipeService)
     : _recipeService = recipeService;
 
   @override
