@@ -16,20 +16,23 @@ class RecipeDetailView extends StatefulWidget {
 }
 
 class _RecipeDetailViewState extends State<RecipeDetailView> {
-  final viewModel = getIt<RecipeDetailViewModel>();
+  late final IRecipeDetailViewModel _viewModel;
 
   @override
   void initState() {
     super.initState();
+
+    _viewModel = getIt<IRecipeDetailViewModel>();
+
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      viewModel.loadRecipe(widget.id);
+      _viewModel.loadRecipe(widget.id);
     });
   }
 
   @override
   Widget build(BuildContext context) {
     return Obx(() {
-      if (viewModel.isLoading) {
+      if (_viewModel.isLoading) {
         return Center(
           child: SizedBox(
             height: 96,
@@ -39,7 +42,7 @@ class _RecipeDetailViewState extends State<RecipeDetailView> {
         );
       }
 
-      if (viewModel.errorMessage! != '') {
+      if (_viewModel.errorMessage! != '') {
         return Center(
           child: Container(
             padding: EdgeInsets.all(32),
@@ -47,7 +50,7 @@ class _RecipeDetailViewState extends State<RecipeDetailView> {
               spacing: 32,
               children: [
                 Text(
-                  'Erro: ${viewModel.errorMessage}',
+                  'Erro: ${_viewModel.errorMessage}',
                   style: TextStyle(fontSize: 24),
                 ),
                 ElevatedButton(
@@ -62,7 +65,7 @@ class _RecipeDetailViewState extends State<RecipeDetailView> {
         );
       }
 
-      final recipe = viewModel.recipe!;
+      final recipe = _viewModel.recipe!;
       return SingleChildScrollView(
         child: Column(
           children: [
@@ -70,7 +73,7 @@ class _RecipeDetailViewState extends State<RecipeDetailView> {
               recipe.image!,
               height: 400,
               width: double.infinity,
-              fit: BoxFit.cover,
+              fit: BoxFit.contain,
               loadingBuilder: (context, child, loadingProgress) =>
                   loadingProgress == null
                   ? child
@@ -120,13 +123,13 @@ class _RecipeDetailViewState extends State<RecipeDetailView> {
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       ElevatedButton(
-                        onPressed: () => context.go('/'),
+                        onPressed: () => context.go('/favorites'),
                         child: Text('VOLTAR'),
                       ),
                       ElevatedButton(
-                        onPressed: () => viewModel.toggleFavorite(),
+                        onPressed: () => _viewModel.toggleFavorite(),
                         child: Text(
-                          viewModel.isFavorite ? 'DESFAVORITAR' : 'FAVORITAR',
+                          _viewModel.isFavorite ? 'DESFAVORITAR' : 'FAVORITAR',
                         ),
                       ),
                     ],

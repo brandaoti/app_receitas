@@ -41,7 +41,7 @@ class FavRecipesViewModelImpl extends GetxController
     _isLoading.value = true;
     _errorMessage.value = '';
 
-    late final String userId;
+    var userId = '';
 
     final currentUser = await _authRepository.currentUser;
 
