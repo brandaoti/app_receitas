@@ -22,7 +22,11 @@ class RecipeRepositoryImpl implements IRecipeRepository {
   Future<Output<List<Recipe>>> getRecipes() async {
     try {
       final recipesData = await _recipeService.fetchRecipes();
-      return Right(recipesData.map((data) => Recipe.fromMap(data)).toList());
+
+      final List<Map<String, dynamic>> dataList = (recipesData as List<dynamic>)
+          .cast<Map<String, dynamic>>();
+
+      return Right(dataList.map((data) => Recipe.fromMap(data)).toList());
     } catch (e) {
       return Left(DefaultException(message: 'Failed to load recipes: $e'));
     }
