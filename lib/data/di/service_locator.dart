@@ -47,7 +47,10 @@ class ServiceLocator {
       ),
     );
     getIt.registerLazySingleton<IRecipeDetailViewModel>(
-      () => RecipeDetailViewModelImpl(getIt<IRecipeRepository>()),
+      () => RecipeDetailViewModelImpl(
+        recipeRepository: getIt<IRecipeRepository>(),
+        authRepository: getIt<IAuthRepository>(),
+      ),
     );
   }
 }

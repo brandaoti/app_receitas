@@ -1,5 +1,6 @@
 import 'package:get/get.dart';
 import '../../data/models/recipe.dart';
+import '../../data/repositories/auth_repository.dart';
 import '../../data/repositories/recipe_repository.dart';
 
 abstract class IRecipeDetailViewModel {
@@ -16,9 +17,13 @@ abstract class IRecipeDetailViewModel {
 class RecipeDetailViewModelImpl extends GetxController
     implements IRecipeDetailViewModel {
   final IRecipeRepository _recipeRepository;
+  final IAuthRepository _authRepository;
 
-  RecipeDetailViewModelImpl(IRecipeRepository recipeRepository)
-    : _recipeRepository = recipeRepository;
+  RecipeDetailViewModelImpl({
+    required IRecipeRepository recipeRepository,
+    required IAuthRepository authRepository,
+  }) : _recipeRepository = recipeRepository,
+       _authRepository = authRepository;
 
   final _recipe = Rxn<Recipe>();
   final _isLoading = false.obs;
@@ -43,6 +48,18 @@ class RecipeDetailViewModelImpl extends GetxController
       _isLoading.value = true;
       _errorMessage.value = '';
       _recipe.value = await _recipeRepository.getRecipeById(id);
+
+      var userId = '';
+
+      final currentUserResult = await _authRepository.currentUser;
+      currentUserResult.fold(
+        ifLeft: (error) {
+          _errorMessage.value = error.message;
+          return;
+        },
+        ifRight: (user) => userId = user.id,
+      );
+      _isFavorite.value = await isRecipeFavorite(id, userId);
     } catch (e) {
       _errorMessage.value = 'Falha ao buscar receita: ${e.toString()}';
     } finally {
@@ -81,9 +98,20 @@ class RecipeDetailViewModelImpl extends GetxController
     _isLoading.value = true;
     _errorMessage.value = '';
 
+    var userId = '';
+
+    final currentUserResult = await _authRepository.currentUser;
+    currentUserResult.fold(
+      ifLeft: (error) {
+        _errorMessage.value = error.message;
+        return;
+      },
+      ifRight: (user) => userId = user.id,
+    );
+
     final result = _isFavorite.value
-        ? await _recipeRepository.deleteFavRecipe(recipe!.id, recipe!.userId)
-        : await _recipeRepository.insertFavRecipe(recipe!.id, recipe!.userId);
+        ? await _recipeRepository.deleteFavRecipe(recipe!.id, userId)
+        : await _recipeRepository.insertFavRecipe(recipe!.id, userId);
 
     result.fold(
       ifLeft: (error) {
