@@ -1,5 +1,8 @@
+import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
+import '../data/di/service_locator.dart';
+import '../data/services/auth_service.dart';
 import '../ui/auth/auth_view.dart';
 import '../ui/base_screen.dart';
 import '../ui/favorite_recipes/fav_recipes_view.dart';
@@ -9,9 +12,22 @@ import '../ui/recipes/recipes_view.dart';
 class AppRouter {
   late final GoRouter router;
 
+  late final IAuthService _service;
+
+  late final ValueNotifier<bool> _authStateNotifier;
+
   AppRouter() {
+    _service = getIt<IAuthService>();
+
+    _authStateNotifier = ValueNotifier<bool>(_service.currentUser != null);
+
+    _service.authStateChanges.listen((_) async {
+      _authStateNotifier.value = _service.currentUser != null;
+    });
+
     router = GoRouter(
-      initialLocation: '/home',
+      initialLocation: '/login',
+      refreshListenable: _authStateNotifier,
       routes: [
         GoRoute(path: '/login', builder: (context, state) => const AuthView()),
         ShellRoute(
@@ -30,6 +46,21 @@ class AppRouter {
           ],
         ),
       ],
+
+      redirect: (context, state) {
+        final isLoggedIn = _authStateNotifier.value;
+        final currentPath = state.uri.path;
+
+        if (!isLoggedIn && currentPath != '/login') {
+          return '/login';
+        }
+
+        if (isLoggedIn && currentPath == '/login') {
+          return '/home';
+        }
+
+        return null;
+      },
     );
   }
 }
