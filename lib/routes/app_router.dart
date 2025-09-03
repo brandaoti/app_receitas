@@ -1,3 +1,4 @@
+import 'package:app_receitas/ui/splash_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
@@ -26,9 +27,10 @@ class AppRouter {
     });
 
     router = GoRouter(
-      initialLocation: '/login',
+      initialLocation: '/',
       refreshListenable: _authStateNotifier,
       routes: [
+        GoRoute(path: '/', builder: (context, state) => const SplashView()),
         GoRoute(path: '/login', builder: (context, state) => const AuthView()),
         ShellRoute(
           builder: (context, state, child) => BaseScreen(child: child),
@@ -50,6 +52,8 @@ class AppRouter {
       redirect: (context, state) {
         final isLoggedIn = _authStateNotifier.value;
         final currentPath = state.uri.path;
+
+        if (currentPath == '/') return null;
 
         if (!isLoggedIn && currentPath != '/login') {
           return '/login';
