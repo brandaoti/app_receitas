@@ -1,4 +1,10 @@
+import 'package:app_receitas/data/di/service_locator.dart';
 import 'package:flutter/material.dart';
+import 'package:get/state_manager.dart';
+import 'package:go_router/go_router.dart';
+
+import '../widgets/recipe_card.dart';
+import 'recipe_view_model.dart';
 
 class RecipesView extends StatefulWidget {
   const RecipesView({super.key});
@@ -8,159 +14,94 @@ class RecipesView extends StatefulWidget {
 }
 
 class _RecipesViewState extends State<RecipesView> {
-  final viewModel = [];
+  late final IRecipeViewModel _viewModel;
 
   @override
   void initState() {
     super.initState();
+
+    _viewModel = getIt<IRecipeViewModel>();
+
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      // viewModel.getRecipes();
+      _viewModel.onInit();
     });
   }
 
   @override
   Widget build(BuildContext context) {
-    // return Obx(() {
-      // if (viewModel.isLoading) {
-      //   return Center(
-      //     child: SizedBox(
-      //       height: 96,
-      //       width: 96,
-      //       child: CircularProgressIndicator(strokeWidth: 12),
-      //     ),
-      //   );
-      // }
+    return Obx(() {
+      if (_viewModel.isLoading) {
+        return Center(
+          child: SizedBox(
+            height: 96,
+            width: 96,
+            child: CircularProgressIndicator(strokeWidth: 12),
+          ),
+        );
+      }
 
-      // if (viewModel.errorMessage != '') {
-      //   return Center(
-      //     child: Container(
-      //       padding: EdgeInsets.all(32),
-      //       child: Column(
-      //         spacing: 32,
-      //         children: [
-      //           Text(
-      //             'Erro: ${viewModel.errorMessage}',
-      //             style: TextStyle(fontSize: 24),
-      //           ),
-      //           ElevatedButton(
-      //             onPressed: () {
-      //               viewModel.getRecipes();
-      //             },
-      //             child: Text('TENTAR NOVAMENTE'),
-      //           ),
-      //         ],
-      //       ),
-      //     ),
-      //   );
-      // }
+      if (_viewModel.errorMessage != '') {
+        return Center(
+          child: Container(
+            padding: EdgeInsets.all(32),
+            child: Column(
+              spacing: 32,
+              children: [
+                Text(
+                  'Erro: ${_viewModel.errorMessage}',
+                  style: TextStyle(fontSize: 24),
+                ),
+                ElevatedButton(
+                  onPressed: () {
+                    _viewModel.getRecipes();
+                  },
+                  child: Text('TENTAR NOVAMENTE'),
+                ),
+              ],
+            ),
+          ),
+        );
+      }
 
       return Container(
         padding: EdgeInsets.all(16),
         child: Column(
           children: [
             Expanded(
-              child: 
-              // viewModel.recipes.isNotEmpty
-              //     ? Center(
-              //         child: Column(
-              //           children: [
-              //             Text(
-              //               '${viewModel.recipes.length} receitas(s)',
-              //               style: TextStyle(
-              //                 fontWeight: FontWeight.bold,
-              //                 fontSize: 16,
-              //               ),
-              //             ),
-              //             const SizedBox(height: 16),
-              //             Expanded(
-              //               child: ListView.builder(
-              //                 itemCount: viewModel.recipes.length,
-              //                 itemBuilder: (context, index) {
-              //                   final recipe = viewModel.recipes[index];
-              //                   final isFavorite = viewModel.favRecipes.any(
-              //                     (fav) => fav.id == recipe.id,
-              //                   );
-              //                   return Stack(
-              //                     children: [
-              //                       GestureDetector(
-              //                         onTap: () =>
-              //                             context.go('/recipe/${recipe.id}'),
-              //                         child: RecipeCard(recipe: recipe),
-              //                       ),
-              //                       Positioned(
-              //                         top: 16,
-              //                         right: 16,
-              //                         child: IconButton(
-              //                           icon: Icon(
-              //                             isFavorite
-              //                                 ? Icons.favorite
-              //                                 : Icons.favorite_border,
-              //                             size: 32,
-              //                             color: isFavorite ? Colors.red : null,
-              //                           ),
-              //                           onPressed: () {
-              //                             if (isFavorite) {
-              //                               viewModel.removeFromFavorites(
-              //                                 recipe,
-              //                               );
-              //                               if (context.mounted) {
-              //                                 ScaffoldMessenger.of(
-              //                                   context,
-              //                                 ).clearSnackBars();
-              //                                 ScaffoldMessenger.of(
-              //                                   context,
-              //                                 ).showSnackBar(
-              //                                   SnackBar(
-              //                                     content: Text(
-              //                                       '${recipe.name} desfavoritada!',
-              //                                     ),
-              //                                     duration: Duration(
-              //                                       seconds: 3,
-              //                                     ),
-              //                                     action: SnackBarAction(
-              //                                       label: 'DESFAZER',
-              //                                       onPressed: () {
-              //                                         viewModel.addToFavorites(
-              //                                           recipe,
-              //                                         );
-              //                                       },
-              //                                     ),
-              //                                   ),
-              //                                 );
-              //                               }
-              //                             } else {
-              //                               viewModel.addToFavorites(recipe);
-              //                               if (context.mounted) {
-              //                                 ScaffoldMessenger.of(
-              //                                   context,
-              //                                 ).clearSnackBars();
-              //                                 ScaffoldMessenger.of(
-              //                                   context,
-              //                                 ).showSnackBar(
-              //                                   SnackBar(
-              //                                     content: Text(
-              //                                       '${recipe.name} favoritada!',
-              //                                     ),
-              //                                     duration: const Duration(
-              //                                       seconds: 2,
-              //                                     ),
-              //                                   ),
-              //                                 );
-              //                               }
-              //                             }
-              //                           },
-              //                         ),
-              //                       ),
-              //                     ],
-              //                   );
-              //                 },
-              //               ),
-              //             ),
-              //           ],
-              //         ),
-              //       )
-              //     : 
-                  Center(
+              child: _viewModel.recipes.isNotEmpty
+                  ? Center(
+                      child: Column(
+                        children: [
+                          Text(
+                            '${_viewModel.recipes.length} receitas(s)',
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 16,
+                            ),
+                          ),
+                          const SizedBox(height: 16),
+                          Expanded(
+                            child: ListView.builder(
+                              shrinkWrap: true,
+                              itemCount: _viewModel.recipes.length,
+                              itemBuilder: (context, index) {
+                                final recipe = _viewModel.recipes[index];
+                                return Stack(
+                                  children: [
+                                    GestureDetector(
+                                      child: RecipeCard(recipe: recipe),
+                                      onTap: () =>
+                                          context.go('/recipe/${recipe.id}'),
+                                    ),
+                                  ],
+                                );
+                              },
+                            ),
+                          ),
+                        ],
+                      ),
+                    )
+                  : Center(
                       child: Column(
                         children: [
                           const SizedBox(height: 64),
@@ -184,6 +125,6 @@ class _RecipesViewState extends State<RecipesView> {
           ],
         ),
       );
-    // });
+    });
   }
 }

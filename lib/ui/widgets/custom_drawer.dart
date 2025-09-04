@@ -1,8 +1,10 @@
+import 'package:app_receitas/data/services/auth_service.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 
+import '../../data/di/service_locator.dart';
 import '../../utils/theme/custom_theme_controller.dart';
 
 class CustomDrawer extends StatelessWidget {
@@ -11,6 +13,8 @@ class CustomDrawer extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Get.find<CustomThemeController>();
+
+    final authService = getIt<IAuthService>();
 
     return Drawer(
       child: Column(
@@ -54,7 +58,7 @@ class CustomDrawer extends StatelessWidget {
             title: Text('Home'),
             onTap: () {
               Navigator.of(context).pop();
-              context.go('/');
+              context.go('/home');
             },
           ),
           ListTile(
@@ -71,6 +75,14 @@ class CustomDrawer extends StatelessWidget {
             onTap: () {
               Navigator.of(context).pop();
               context.go('/search');
+            },
+          ),
+          ListTile(
+            leading: Icon(Icons.logout),
+            title: Text('Sair'),
+            onTap: () {
+              authService.signOut();
+              context.go('/login');
             },
           ),
         ],
